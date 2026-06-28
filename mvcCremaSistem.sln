@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mvcCremaSistem", "mvcCremaSistem.csproj", "{159CB72A-58B3-4D34-BB22-2E15220335D3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{159CB72A-58B3-4D34-BB22-2E15220335D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{159CB72A-58B3-4D34-BB22-2E15220335D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{159CB72A-58B3-4D34-BB22-2E15220335D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{159CB72A-58B3-4D34-BB22-2E15220335D3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5973D9BD-1733-4EE9-A511-C0C9B73AAB03}
+	EndGlobalSection
+EndGlobal

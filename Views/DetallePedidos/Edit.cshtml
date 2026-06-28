@@ -1,0 +1,74 @@
+﻿@model mvcCremaSistem.Models.DetallePedidos
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>DetallePedidos</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="PedidoId" class="control-label"></label>
+                <select asp-for="PedidoId" class="form-control" asp-items="ViewBag.PedidoId"></select>
+                <span asp-validation-for="PedidoId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductoId" class="control-label"></label>
+                <select asp-for="ProductoId" class="form-control" asp-items="ViewBag.ProductoId"></select>
+                <span asp-validation-for="ProductoId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductoNombre" class="control-label"></label>
+                <input asp-for="ProductoNombre" class="form-control" />
+                <span asp-validation-for="ProductoNombre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductoDescripcion" class="control-label"></label>
+                <input asp-for="ProductoDescripcion" class="form-control" />
+                <span asp-validation-for="ProductoDescripcion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="GramajeId" class="control-label"></label>
+                <select asp-for="GramajeId" class="form-control" asp-items="ViewBag.GramajeId"></select>
+                <span asp-validation-for="GramajeId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="GramajeSeleccionado" class="control-label"></label>
+                <input asp-for="GramajeSeleccionado" class="form-control" />
+                <span asp-validation-for="GramajeSeleccionado" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Cantidad" class="control-label"></label>
+                <input asp-for="Cantidad" class="form-control" />
+                <span asp-validation-for="Cantidad" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PrecioUnitario" class="control-label"></label>
+                <input asp-for="PrecioUnitario" class="form-control" />
+                <span asp-validation-for="PrecioUnitario" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Subtotal" class="control-label"></label>
+                <input asp-for="Subtotal" class="form-control" />
+                <span asp-validation-for="Subtotal" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

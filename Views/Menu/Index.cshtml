@@ -1,0 +1,975 @@
+﻿@{
+    ViewData["Title"] = "Menú - Tu Antojito";
+    var productosAgrupados = ViewBag.ProductosAgrupados as List<mvcCremaSistem.Controllers.MenuGrupoViewModel> ?? new List<mvcCremaSistem.Controllers.MenuGrupoViewModel>();
+    var carritoItems = ViewBag.CarritoItems as List<mvcCremaSistem.Controllers.CarritoItem> ?? new List<mvcCremaSistem.Controllers.CarritoItem>();
+    var totalProductos = ViewBag.TotalProductos ?? 0;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f5f0;
+            color: #333;
+        }
+
+        .menu-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .menu-header {
+            text-align: center;
+            padding: 40px 20px 30px;
+            background: linear-gradient(135deg, #fff5ee, #fce4d6);
+            border-radius: 20px;
+            margin-bottom: 40px;
+        }
+
+            .menu-header h1 {
+                font-size: 2.8rem;
+                color: #d45a3a;
+                margin-bottom: 10px;
+                font-weight: 700;
+            }
+
+                .menu-header h1 span {
+                    color: #f7b731;
+                }
+
+            .menu-header p {
+                font-size: 1.1rem;
+                color: #6b5b4e;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+
+        /* Debug info */
+        .debug-info {
+            background: #fff3cd;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+            font-size: 0.95rem;
+        }
+
+            .debug-info strong {
+                color: #856404;
+            }
+
+        .categoria-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .categoria-tab {
+            padding: 10px 28px;
+            border-radius: 30px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #fff;
+            opacity: 0.7;
+            transform: scale(0.95);
+        }
+
+            .categoria-tab:hover, .categoria-tab.active {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }
+
+        .productos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .producto-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+
+            .producto-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            }
+
+            .producto-card.destacado {
+                border: 2px solid #f7b731;
+            }
+
+        .badge-destacado {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #f7b731;
+            color: #fff;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            z-index: 2;
+        }
+
+        .producto-imagen {
+            height: 200px;
+            background: #f0ebe5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+            .producto-imagen img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .producto-imagen .no-image {
+                font-size: 3rem;
+                color: #ccc;
+            }
+
+        .producto-info {
+            padding: 18px 20px 20px;
+        }
+
+        .producto-nombre {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #2d2d2d;
+            margin-bottom: 4px;
+        }
+
+        .producto-descripcion {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .producto-precios {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .precio-actual {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #d45a3a;
+        }
+
+        .precio-rango {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .gramaje-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .gramaje-btn {
+            padding: 4px 14px;
+            border-radius: 20px;
+            border: 2px solid #e8e0d8;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            color: #555;
+        }
+
+            .gramaje-btn:hover {
+                border-color: #d45a3a;
+                color: #d45a3a;
+            }
+
+            .gramaje-btn.active {
+                border-color: #d45a3a;
+                background: #d45a3a;
+                color: #fff;
+            }
+
+        .btn-agregar {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            background: #d45a3a;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+            .btn-agregar:hover {
+                background: #b84a2e;
+            }
+
+            .btn-agregar:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+            }
+
+        /* Carrito flotante */
+        .cart-floating {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+
+        .cart-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            background: #d45a3a;
+            color: #fff;
+            font-size: 1.8rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(212, 90, 58, 0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+            .cart-btn:hover {
+                transform: scale(1.05);
+                box-shadow: 0 6px 30px rgba(212, 90, 58, 0.5);
+            }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #f7b731;
+            color: #fff;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-panel {
+            position: fixed;
+            bottom: 110px;
+            right: 30px;
+            width: 380px;
+            max-height: 500px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            z-index: 999;
+        }
+
+            .cart-panel.open {
+                display: flex;
+                animation: slideUp 0.3s ease;
+            }
+
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cart-header {
+            padding: 16px 20px;
+            background: #2d2d2d;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .cart-header h3 {
+                font-size: 1.1rem;
+            }
+
+        .cart-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+            max-height: 320px;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 14px;
+            padding: 12px 20px;
+            border-bottom: 1px solid #f0ebe5;
+            align-items: center;
+        }
+
+        .cart-item-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: #f0ebe5;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .cart-item-gramaje {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .cart-item-price {
+            font-weight: 600;
+            color: #d45a3a;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+            .cart-item-actions button {
+                width: 26px;
+                height: 26px;
+                border-radius: 50%;
+                border: none;
+                background: #f0ebe5;
+                cursor: pointer;
+                font-weight: 700;
+                transition: background 0.2s;
+            }
+
+                .cart-item-actions button:hover {
+                    background: #e0d5cc;
+                }
+
+            .cart-item-actions .qty {
+                width: 24px;
+                text-align: center;
+                font-weight: 600;
+            }
+
+        .cart-item-remove {
+            background: none !important;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+            .cart-item-remove:hover {
+                color: #d45a3a !important;
+            }
+
+        .cart-footer {
+            padding: 16px 20px;
+            border-top: 2px solid #f0ebe5;
+            background: #faf8f6;
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #d45a3a;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+            .btn-checkout:hover {
+                background: #b84a2e;
+            }
+
+            .btn-checkout:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+            }
+
+        .cart-empty {
+            padding: 30px 20px;
+            text-align: center;
+            color: #999;
+        }
+
+            .cart-empty i {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+                display: block;
+                color: #ddd;
+            }
+
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 600;
+            z-index: 2000;
+            animation: slideIn 0.4s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: none;
+        }
+
+        .toast-success {
+            background: #28a745;
+        }
+
+        .toast-error {
+            background: #dc3545;
+        }
+
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .no-productos {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 16px;
+        }
+
+            .no-productos i {
+                font-size: 3rem;
+                color: #ddd;
+                display: block;
+                margin-bottom: 15px;
+            }
+
+            .no-productos h3 {
+                color: #666;
+                margin-bottom: 10px;
+            }
+
+            .no-productos p {
+                color: #999;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            .no-productos .consejo {
+                margin-top: 20px;
+                font-size: 0.9rem;
+                color: #aaa;
+            }
+
+        @@media (max-width: 768px) {
+            .menu-header h1 {
+                font-size: 2rem;
+            }
+
+            .productos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+
+            .cart-panel {
+                width: 320px;
+                right: 10px;
+                bottom: 100px;
+            }
+
+            .cart-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .productos-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cart-panel {
+                width: calc(100% - 20px);
+                right: 10px;
+                bottom: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-container">
+        <!-- Header -->
+        <div class="menu-header">
+            <h1>🍓 Tu <span>Antojito</span></h1>
+            <p>¡Las mejores fresas con crema de la ciudad, frescas, deliciosas y preparadas con amor cada día!</p>
+        </div>
+
+        <!-- Debug info -->
+        <div class="debug-info">
+            <strong>🔍 Información:</strong>
+            Total productos en base de datos: <strong>@totalProductos</strong> |
+            Categorías: <strong>@productosAgrupados.Count</strong>
+            @if (totalProductos == 0)
+            {
+                <span style="color:#dc3545; font-weight:bold;"> ⚠️ No hay productos activos en la base de datos</span>
+            }
+        </div>
+
+        <!-- Categorías -->
+        <div class="categoria-tabs" id="categoriaTabs">
+            <button class="categoria-tab active" data-categoria="todas" style="background:#6c757d;">Todos</button>
+            @if (productosAgrupados != null && productosAgrupados.Any())
+            {
+                foreach (var grupo in productosAgrupados)
+                {
+                    <button class="categoria-tab" data-categoria="@grupo.Categoria" style="background:@grupo.Color;">
+                        @grupo.Categoria
+                    </button>
+                }
+            }
+        </div>
+
+        <!-- Grid de productos -->
+        <div class="productos-grid" id="productosGrid">
+            @if (productosAgrupados != null && productosAgrupados.Any())
+            {
+                foreach (var grupo in productosAgrupados)
+                {
+                    foreach (var producto in grupo.Productos)
+                    {
+                        <div class="producto-card @(producto.Destacado ? "destacado" : "")" data-categoria="@grupo.Categoria">
+                            @if (producto.Destacado)
+                            {
+                                <span class="badge-destacado">⭐ Destacado</span>
+                            }
+                            <div class="producto-imagen">
+                                @if (!string.IsNullOrEmpty(producto.Imagen))
+                                {
+                                    <img src="data:image/png;base64,@producto.Imagen" alt="@producto.Nombre" />
+                                }
+                                else
+                                {
+                                    <span class="no-image">🍓</span>
+                                }
+                            </div>
+                            <div class="producto-info">
+                                <div class="producto-nombre">@producto.Nombre</div>
+                                <div class="producto-descripcion">@producto.Descripcion</div>
+                                <div class="producto-precios">
+                                    @if (producto.Gramajes != null && producto.Gramajes.Count == 1)
+                                    {
+                                        <span class="precio-actual">Bs @producto.Gramajes.First().Precio.ToString("F2")</span>
+                                    }
+                                    else if (producto.Gramajes != null && producto.Gramajes.Count > 1)
+                                    {
+                                        <span class="precio-actual">Bs @producto.PrecioMin.ToString("F2")</span>
+                                        <span class="precio-rango">- Bs @producto.PrecioMax.ToString("F2")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="precio-actual" style="color:#999;">Sin precio</span>
+                                    }
+                                </div>
+
+                                @if (producto.Gramajes != null && producto.Gramajes.Any())
+                                {
+                                    <div class="gramaje-selector" data-producto="@producto.Id">
+                                        @foreach (var gramaje in producto.Gramajes)
+                                        {
+                                            <button class="gramaje-btn @(gramaje == producto.Gramajes.First() ? "active" : "")"
+                                                    data-gramaje="@gramaje.Id"
+                                                    data-precio="@gramaje.Precio">
+                                                @gramaje.Gramos g - Bs @gramaje.Precio.ToString("F2")
+                                            </button>
+                                        }
+                                    </div>
+
+                                    <button class="btn-agregar" data-producto="@producto.Id" data-gramaje="@producto.Gramajes.First().Id">
+                                        <i class="fas fa-plus"></i> Agregar
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn-agregar" disabled>
+                                        <i class="fas fa-exclamation-triangle"></i> Sin gramajes
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            }
+            else
+            {
+                <div class="no-productos">
+                    <i class="fas fa-utensils"></i>
+                    <h3>No hay productos disponibles</h3>
+                    <p>No se encontraron productos activos en la base de datos.</p>
+                    <div class="consejo">
+                        <p>💡 <strong>Consejo:</strong></p>
+                        <p>1. Verifica que los productos tengan <strong>Estado = "Activo"</strong></p>
+                        <p>2. Verifica que los productos tengan <strong>gramajes</strong> asociados</p>
+                        <p>3. Agrega productos desde <a href="/Producto">Producto</a> o directamente en la base de datos</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Carrito flotante -->
+    <div class="cart-floating">
+        <button class="cart-btn" id="cartToggle">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+
+        <div class="cart-panel" id="cartPanel">
+            <div class="cart-header">
+                <h3><i class="fas fa-shopping-cart"></i> Mi Pedido</h3>
+                <button class="cart-close" id="cartClose">&times;</button>
+            </div>
+            <div class="cart-items" id="cartItems"></div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>Total:</span>
+                    <span id="cartTotal">Bs 0.00</span>
+                </div>
+                <button class="btn-checkout" id="checkoutBtn" disabled>Procesar Pedido <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast-notification"></div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let carritoItems = @Html.Raw(Json.Serialize(carritoItems));
+
+            function actualizarBadge() {
+                const total = carritoItems.reduce((sum, item) => sum + item.cantidad, 0);
+                $('#cartBadge').text(total);
+            }
+
+            function renderizarCarrito() {
+                const $items = $('#cartItems');
+                if (carritoItems.length === 0) {
+                    $items.html(`
+                        <div class="cart-empty">
+                            <i class="fas fa-shopping-bag"></i>
+                            <p>Tu carrito está vacío</p>
+                            <small style="color:#ccc;">Agrega tus productos favoritos</small>
+                        </div>
+                    `);
+                    $('#cartTotal').text('Bs 0.00');
+                    $('#checkoutBtn').prop('disabled', true);
+                    return;
+                }
+
+                let html = '';
+                let total = 0;
+                carritoItems.forEach((item, index) => {
+                    const subtotal = item.precioUnitario * item.cantidad;
+                    total += subtotal;
+                    html += `
+                        <div class="cart-item" data-index="${index}">
+                            <img class="cart-item-img" src="${item.imagen ? 'data:image/png;base64,' + item.imagen : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect fill=\'%23f0ebe5\' width=\'100\' height=\'100\'/%3E%3Ctext x=\'50\' y=\'55\' font-size=\'30\' text-anchor=\'middle\' dy=\'.35em\'%3E🍓%3C/text%3E%3C/svg%3E'}" alt="${item.productoNombre}" />
+                            <div class="cart-item-info">
+                                <div class="cart-item-name">${item.productoNombre}</div>
+                                <div class="cart-item-gramaje">${item.gramajeTexto}</div>
+                                <div class="cart-item-price">Bs ${(item.precioUnitario * item.cantidad).toFixed(2)}</div>
+                            </div>
+                            <div class="cart-item-actions">
+                                <button class="cart-qty-minus" data-producto="${item.productoId}" data-gramaje="${item.gramajeId}">−</button>
+                                <span class="qty">${item.cantidad}</span>
+                                <button class="cart-qty-plus" data-producto="${item.productoId}" data-gramaje="${item.gramajeId}">+</button>
+                                <button class="cart-item-remove" data-producto="${item.productoId}" data-gramaje="${item.gramajeId}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                $items.html(html);
+                $('#cartTotal').text(`Bs ${total.toFixed(2)}`);
+                $('#checkoutBtn').prop('disabled', false);
+                actualizarBadge();
+            }
+
+            function showToast(message, type = 'success') {
+                const $toast = $('#toast');
+                $toast.text(message)
+                    .removeClass('toast-success toast-error')
+                    .addClass(type === 'success' ? 'toast-success' : 'toast-error')
+                    .fadeIn(300);
+                setTimeout(() => {
+                    $toast.fadeOut(300);
+                }, 3000);
+            }
+
+            // Toggle carrito
+            $('#cartToggle').click(function() {
+                $('#cartPanel').toggleClass('open');
+                if ($('#cartPanel').hasClass('open')) {
+                    renderizarCarrito();
+                }
+            });
+
+            $('#cartClose').click(function() {
+                $('#cartPanel').removeClass('open');
+            });
+
+            $(document).click(function(e) {
+                if (!$(e.target).closest('.cart-floating').length) {
+                    $('#cartPanel').removeClass('open');
+                }
+            });
+
+            // Selección de gramajes
+            $('.gramaje-btn').click(function() {
+                const $parent = $(this).closest('.gramaje-selector');
+                $parent.find('.gramaje-btn').removeClass('active');
+                $(this).addClass('active');
+                const $card = $(this).closest('.producto-card');
+                $card.find('.btn-agregar').data('gramaje', $(this).data('gramaje'));
+            });
+
+            // Agregar al carrito
+            $(document).on('click', '.btn-agregar:not([disabled])', function() {
+                const $card = $(this).closest('.producto-card');
+                const productoId = $(this).data('producto');
+                const gramajeId = $(this).data('gramaje');
+
+                if (!gramajeId) {
+                    showToast('Por favor selecciona un gramaje', 'error');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/Menu/AgregarAlCarrito',
+                    method: 'POST',
+                    data: {
+                        productoId: productoId,
+                        gramajeId: gramajeId,
+                        cantidad: 1
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            const nombre = $card.find('.producto-nombre').text();
+                            const gramajeTexto = $card.find('.gramaje-btn.active').text().trim().replace(/ - Bs.*$/, '');
+                            const precio = $card.find('.gramaje-btn.active').data('precio');
+                            const imagen = $card.find('.producto-imagen img').attr('src') || null;
+
+                            const existente = carritoItems.find(item =>
+                                item.productoId === productoId && item.gramajeId === gramajeId
+                            );
+
+                            if (existente) {
+                                existente.cantidad += 1;
+                            } else {
+                                carritoItems.push({
+                                    productoId: productoId,
+                                    productoNombre: nombre,
+                                    gramajeId: gramajeId,
+                                    gramajeTexto: gramajeTexto,
+                                    precioUnitario: precio,
+                                    cantidad: 1,
+                                    imagen: imagen
+                                });
+                            }
+
+                            actualizarBadge();
+                            if (response.carritoCount !== undefined) {
+                                $('#cartBadge').text(response.carritoCount);
+                            }
+                            showToast('✅ Producto agregado al carrito');
+                        } else {
+                            showToast(response.message || 'Error al agregar', 'error');
+                        }
+                    },
+                    error: function() {
+                        showToast('Error al agregar el producto', 'error');
+                    }
+                });
+            });
+
+            // Eventos del carrito
+            $(document).on('click', '.cart-qty-plus', function() {
+                const productoId = $(this).data('producto');
+                const gramajeId = $(this).data('gramaje');
+                const item = carritoItems.find(i => i.productoId === productoId && i.gramajeId === gramajeId);
+                if (item) {
+                    item.cantidad += 1;
+                    actualizarCantidadServidor(productoId, gramajeId, item.cantidad);
+                    renderizarCarrito();
+                }
+            });
+
+            $(document).on('click', '.cart-qty-minus', function() {
+                const productoId = $(this).data('producto');
+                const gramajeId = $(this).data('gramaje');
+                const item = carritoItems.find(i => i.productoId === productoId && i.gramajeId === gramajeId);
+                if (item) {
+                    if (item.cantidad > 1) {
+                        item.cantidad -= 1;
+                        actualizarCantidadServidor(productoId, gramajeId, item.cantidad);
+                    } else {
+                        carritoItems = carritoItems.filter(i => !(i.productoId === productoId && i.gramajeId === gramajeId));
+                        eliminarDelCarrito(productoId, gramajeId);
+                    }
+                    renderizarCarrito();
+                }
+            });
+
+            $(document).on('click', '.cart-item-remove', function() {
+                const productoId = $(this).data('producto');
+                const gramajeId = $(this).data('gramaje');
+                carritoItems = carritoItems.filter(i => !(i.productoId === productoId && i.gramajeId === gramajeId));
+                eliminarDelCarrito(productoId, gramajeId);
+                renderizarCarrito();
+            });
+
+            function actualizarCantidadServidor(productoId, gramajeId, cantidad) {
+                $.ajax({
+                    url: '/Menu/ActualizarCarrito',
+                    method: 'POST',
+                    data: {
+                        productoId: productoId,
+                        gramajeId: gramajeId,
+                        cantidad: cantidad
+                    }
+                });
+            }
+
+            function eliminarDelCarrito(productoId, gramajeId) {
+                $.ajax({
+                    url: '/Menu/EliminarDelCarrito',
+                    method: 'POST',
+                    data: {
+                        productoId: productoId,
+                        gramajeId: gramajeId
+                    },
+                    success: function(response) {
+                        if (response.carritoCount !== undefined) {
+                            $('#cartBadge').text(response.carritoCount);
+                        }
+                    }
+                });
+            }
+
+            // Filtro por categoría
+            $('.categoria-tab').click(function() {
+                $('.categoria-tab').removeClass('active');
+                $(this).addClass('active');
+
+                const categoria = $(this).data('categoria');
+                if (categoria === 'todas') {
+                    $('.producto-card').show();
+                } else {
+                    $('.producto-card').each(function() {
+                        $(this).toggle($(this).data('categoria') === categoria);
+                    });
+                }
+            });
+
+            // Checkout
+            $('#checkoutBtn').click(function() {
+                if (carritoItems.length === 0) {
+                    showToast('El carrito está vacío', 'error');
+                    return;
+                }
+                window.location.href = '/Pedidos/Create';
+            });
+
+            // Inicializar
+            actualizarBadge();
+            renderizarCarrito();
+        });
+    </script>
+
+</body>
+</html>
